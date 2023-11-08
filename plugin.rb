@@ -49,7 +49,7 @@ after_initialize do
          user.custom_fields["signature_raw"]
       cooked_sig =
         PrettyText.cook(
-          user.custom_fields["signature_raw"],
+          "*" + user.custom_fields["signature_raw"].delete_suffix("\n") + "*",
           omit_nofollow: user.has_trust_level?(TrustLevel[3]) && !SiteSetting.tl3_links_no_follow,
         )
       # avoid infinite recursion
