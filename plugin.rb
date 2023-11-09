@@ -47,11 +47,19 @@ after_initialize do
   DiscourseEvent.on(:user_updated) do |user|
     if SiteSetting.signatures_enabled? && SiteSetting.signatures_advanced_mode &&
          user.custom_fields["signature_raw"]
-      cooked_sig =
-        PrettyText.cook(
-          "*" + user.custom_fields["signature_raw"].delete_suffix("\n") + "*",
-          omit_nofollow: user.has_trust_level?(TrustLevel[3]) && !SiteSetting.tl3_links_no_follow,
-        )
+      if user.custom_fields["signature_raw"].blank?
+        cooked_sig =
+          PrettyText.cook(
+            user.custom_fields["signature_raw"],
+            omit_nofollow: user.has_trust_level?(TrustLevel[3]) && !SiteSetting.tl3_links_no_follow,
+          )
+      else
+        cooked_sig =
+          PrettyText.cook(
+            "*" + user.custom_fields["signature_raw"].delete_suffix("\n") + "*",
+            omit_nofollow: user.has_trust_level?(TrustLevel[3]) && !SiteSetting.tl3_links_no_follow,
+          )
+      end
       # avoid infinite recursion
       if cooked_sig != user.custom_fields["signature_cooked"]
         user.custom_fields["signature_cooked"] = cooked_sig
